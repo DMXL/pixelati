@@ -1,0 +1,49 @@
+{
+  "name": "pixelati",
+  "version": "0.1.0",
+  "description": "Turn any image into truecolor terminal art using half-block characters.",
+  "type": "module",
+  "bin": {
+    "pixelati": "dist/cli.js"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "pixelati": "tsx src/cli.ts",
+    "start": "tsx src/cli.ts",
+    "prepublishOnly": "tsc"
+  },
+  "keywords": [
+    "terminal",
+    "ansi",
+    "image",
+    "ascii-art",
+    "cli",
+    "truecolor",
+    "half-block"
+  ],
+  "author": "DMXL",
+  "license": "MIT",
+  "packageManager": "pnpm@10.9.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "sharp": "^0.34.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.6.0"
+  }
+}
