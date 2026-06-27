@@ -6,12 +6,34 @@ It works as both a command line tool and a small library, and it reads any forma
 
 ## Install
 
+As a CLI:
+
 ```bash
-pnpm install
-pnpm build
+npm install -g pixelati
+pixelati <image>
 ```
 
-Run it directly during development with `pnpm pixelati <image>`, or after building call `node dist/cli.js <image>`. If you link or publish the package, the `pixelati` binary becomes available on your PATH.
+As a library:
+
+```bash
+npm install pixelati
+```
+
+```ts
+import { renderToLines } from "pixelati";
+const lines = await renderToLines("logo.png", { width: 56 });
+console.log(lines.join("\n"));
+```
+
+This is an ESM-only package and needs Node 18 or newer.
+
+### Local development
+
+```bash
+pnpm install
+pnpm build       # compiles to dist/
+pnpm pixelati <image>   # run from source via tsx
+```
 
 ## Usage
 

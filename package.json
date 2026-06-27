@@ -34,6 +34,18 @@
   ],
   "author": "DMXL",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DMXL/pixelati.git"
+  },
+  "homepage": "https://github.com/DMXL/pixelati#readme",
+  "bugs": {
+    "url": "https://github.com/DMXL/pixelati/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
   "packageManager": "pnpm@10.9.0",
   "engines": {
     "node": ">=18"
