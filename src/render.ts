@@ -11,6 +11,12 @@ import sharp from "sharp";
 export interface RenderOptions {
   /** Target width in terminal columns (one column per source pixel). */
   width?: number;
+  /**
+   * Maximum height in terminal rows (each row is two pixels tall). When set,
+   * the image is scaled to fit within width × height, preserving aspect, so a
+   * tall image stays inside the box instead of overflowing.
+   */
+  height?: number;
   /** Alpha cutoff (0-255). Pixels at or below this are treated as transparent. */
   threshold?: number;
   /**
@@ -19,6 +25,12 @@ export interface RenderOptions {
    * pixels render as blanks.
    */
   background?: string;
+  /**
+   * Crop uniform/transparent borders before scaling so the subject fills the
+   * frame. Useful for sprites or logos centred in a large transparent canvas,
+   * which would otherwise render tiny and blurry.
+   */
+  trim?: boolean;
 }
 
 interface RGBA {
@@ -76,19 +88,49 @@ export async function renderToLines(
   const threshold = opts.threshold ?? DEFAULT_THRESHOLD;
   const base = opts.background ? parseHex(opts.background) : null;
 
-  const pipeline = sharp(input);
-  const meta = await pipeline.metadata();
-  if (!meta.width || !meta.height) {
+  // Optionally crop uniform/transparent borders first, so the subject fills the
+  // frame before scaling. trim() can throw on a uniform image; fall back to the
+  // original in that case. Work out the source dimensions after any trim.
+  let source: string | Buffer = input;
+  let srcWidth: number;
+  let srcHeight: number;
+  if (opts.trim) {
+    try {
+      const t = await sharp(input).trim().toBuffer({ resolveWithObject: true });
+      source = t.data;
+      srcWidth = t.info.width;
+      srcHeight = t.info.height;
+    } catch {
+      const m = await sharp(input).metadata();
+      srcWidth = m.width ?? 0;
+      srcHeight = m.height ?? 0;
+    }
+  } else {
+    const m = await sharp(input).metadata();
+    srcWidth = m.width ?? 0;
+    srcHeight = m.height ?? 0;
+  }
+  if (!srcWidth || !srcHeight) {
     throw new Error("Could not read image dimensions.");
   }
 
   // Preserve aspect ratio. Each pixel is one column wide and (paired) one text
-  // row holds two pixels, so square pixels keep the picture's proportions.
-  let height = Math.max(2, Math.round(width * (meta.height / meta.width)));
-  if (height % 2 === 1) height += 1; // even rows pair cleanly into half blocks
+  // row holds two pixels, so square pixels keep the picture's proportions. With
+  // a height cap, scale to fit within width × (height rows) so a tall image
+  // stays inside the box instead of overflowing.
+  let targetW = width;
+  let targetH = Math.round(width * (srcHeight / srcWidth));
+  if (opts.height && opts.height > 0) {
+    const maxPxH = Math.floor(opts.height) * 2;
+    const scale = Math.min(width / srcWidth, maxPxH / srcHeight);
+    targetW = Math.max(1, Math.round(srcWidth * scale));
+    targetH = Math.round(srcHeight * scale);
+  }
+  targetH = Math.max(2, targetH);
+  if (targetH % 2 === 1) targetH += 1; // even rows pair cleanly into half blocks
 
-  const { data, info } = await pipeline
-    .resize(width, height, { fit: "fill" })
+  const { data, info } = await sharp(source)
+    .resize(targetW, targetH, { fit: "fill" })
     .ensureAlpha()
     .raw()
     .toBuffer({ resolveWithObject: true });

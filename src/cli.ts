@@ -12,6 +12,8 @@ interface Args {
   threshold?: number;
   background?: string;
   output?: string;
+  trim?: boolean;
+  height?: number;
   help?: boolean;
 }
 
@@ -22,14 +24,17 @@ Usage:
 
 Options:
   -w, --width <n>        Output width in columns (default: terminal width or 80)
+  -H, --height <n>       Max height in rows; scales to fit within width × height
   -t, --threshold <n>    Alpha cutoff 0-255; at or below is transparent (default: 128)
   -b, --background <hex> Composite onto this colour instead of leaving gaps (e.g. #1e1e2e)
   -o, --output <file>    Write the art to a file instead of stdout
+  -T, --trim             Crop uniform/transparent borders so the subject fills the frame
   -h, --help             Show this help
 
 Examples:
   pixelati logo.png
   pixelati photo.jpg -w 60
+  pixelati sprite.png -T -w 24
   pixelati icon.png -b "#000000"
   pixelati banner.png -w 100 -o banner.ans
 `;
@@ -52,6 +57,10 @@ function parseArgs(argv: string[]): Args {
       case "--width":
         args.width = Number(next());
         break;
+      case "-H":
+      case "--height":
+        args.height = Number(next());
+        break;
       case "-t":
       case "--threshold":
         args.threshold = Number(next());
@@ -63,6 +72,10 @@ function parseArgs(argv: string[]): Args {
       case "-o":
       case "--output":
         args.output = next();
+        break;
+      case "-T":
+      case "--trim":
+        args.trim = true;
         break;
       default:
         if (a.startsWith("-")) throw new Error(`Unknown option: ${a}`);
@@ -93,8 +106,10 @@ async function main(): Promise<void> {
 
   const opts: RenderOptions = {
     width: args.width ?? process.stdout.columns ?? 80,
+    height: args.height,
     threshold: args.threshold,
     background: args.background,
+    trim: args.trim,
   };
 
   const lines = await renderToLines(args.input, opts);

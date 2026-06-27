@@ -1,6 +1,6 @@
 {
   "name": "pixelati",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Turn any image into truecolor terminal art using half-block characters.",
   "type": "module",
   "bin": {

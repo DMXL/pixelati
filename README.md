@@ -44,8 +44,10 @@ pixelati <image> [options]
 | Option | Description |
 |---|---|
 | `-w, --width <n>` | Output width in columns. Defaults to the terminal width, or 80 when piped. |
+| `-H, --height <n>` | Maximum height in rows. The image is scaled to fit within width × height, preserving aspect, so tall images stay inside the box. |
 | `-t, --threshold <n>` | Alpha cutoff from 0 to 255. Pixels at or below it are treated as transparent. Default 128. |
 | `-b, --background <hex>` | Composite the image onto this colour instead of leaving transparent gaps (for example `#1e1e2e`). |
+| `-T, --trim` | Crop uniform or transparent borders before scaling, so a subject centred in a large canvas (like a sprite) fills the frame instead of rendering tiny. |
 | `-o, --output <file>` | Write the art to a file instead of printing it. |
 | `-h, --help` | Show help. |
 
